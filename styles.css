@@ -1,0 +1,113 @@
+/* QUILL - dark literary prize. Newsreader serif, ink + gold, ranked entry leaderboards. No 3D. */
+
+:root{
+  --ink:#15120c; --ink2:#1e1a12; --card:#1b1710; --paper:#ece3cf; --paper2:#bdb293; --mut:#897d63; --faint:#5f5743;
+  --line:#332d20; --line2:#48402d;
+  --gold:#c9a23f; --gold-d:#a8841f; --gold-soft:rgba(201,162,63,.14);
+  --rose:#bd6a4f;
+  --serif:"Newsreader",Georgia,serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --maxw:1600px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--paper2);font-family:var(--serif);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{color:var(--paper);font-family:var(--serif);line-height:1.12;font-weight:500}
+a{color:var(--gold);text-decoration:none}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+em{font-style:italic;color:var(--gold)}
+
+.btn{font-family:var(--serif);font-weight:500;font-size:15px;border:1px solid var(--line2);background:transparent;color:var(--paper);padding:9px 16px;cursor:pointer;border-radius:3px;transition:background .15s,border-color .15s,color .15s}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.sm{font-size:13.5px;padding:7px 13px}
+.btn.gold{background:var(--gold);color:#1a1409;border-color:var(--gold);font-weight:600}
+.btn.gold:hover{background:var(--gold-d);color:#1a1409}
+.btn.ghost{border-color:transparent;color:var(--paper2)}.btn.ghost:hover{color:var(--gold)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.block{width:100%;text-align:center;display:block;margin-top:18px;padding:13px}
+.icon-btn{background:transparent;border:1px solid var(--line2);border-radius:3px;width:34px;height:34px;cursor:pointer;color:var(--paper2);font-size:14px}
+.icon-btn:hover{color:var(--gold);border-color:var(--gold)}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(21,18,12,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-inner{max-width:var(--maxw);margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{font-size:22px;font-weight:600;color:var(--paper);display:flex;align-items:baseline;gap:10px}
+.brand span{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
+.nav-end{display:flex;align-items:center;gap:12px}
+
+/* MASTHEAD */
+.mast{max-width:var(--maxw);margin:0 auto;padding:70px 24px 50px;border-bottom:1px solid var(--line)}
+.mast-kick{font-family:var(--mono);font-size:11px;letter-spacing:.18em;color:var(--gold);margin-bottom:24px}
+.mast h1{font-size:clamp(44px,7vw,78px);font-weight:500;letter-spacing:-.01em;margin-bottom:24px}
+.mast-sub{font-size:clamp(17px,1.9vw,21px);color:var(--paper2);max-width:62ch;line-height:1.7;margin-bottom:34px}
+.mast-stats{display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:13px;color:var(--mut);border-top:1px solid var(--line);padding-top:20px;flex-wrap:wrap}
+.mast-stats b{color:var(--paper);font-size:18px}
+.mast-stats .d{color:var(--line2)}
+
+/* CONTESTS */
+.wrap{max-width:var(--maxw);margin:0 auto;padding:50px 24px 80px}
+.contests{display:flex;flex-direction:column;gap:30px}
+.contest{border:1px solid var(--line);border-radius:6px;background:var(--card);overflow:hidden}
+.contest-h{padding:26px 28px 22px;border-bottom:1px solid var(--line)}
+.contest-top{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:12px}
+.contest-title{font-size:28px;font-weight:600;color:var(--paper);line-height:1.2}
+.cbadge{flex-shrink:0;font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding:5px 11px;border:1px solid;border-radius:3px;text-transform:uppercase;white-space:nowrap}
+.cb-open{color:var(--gold);border-color:var(--gold)}
+.cb-closed{color:var(--paper2);border-color:var(--line2)}
+.contest-prompt{font-size:17px;color:var(--paper2);font-style:italic;line-height:1.6;max-width:70ch}
+.contest-meta{display:flex;gap:20px;flex-wrap:wrap;margin-top:14px;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.contest-meta b{color:var(--gold)}
+/* leaderboard */
+.board{padding:8px 28px 20px}
+.board-t{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--faint);text-transform:uppercase;padding:16px 0 10px}
+.entry{display:grid;grid-template-columns:40px 1fr auto;gap:16px;align-items:center;padding:14px 0;border-top:1px solid var(--line)}
+.entry-rank{font-family:var(--mono);font-size:20px;color:var(--faint);text-align:center}
+.entry.win .entry-rank{color:var(--gold)}
+.entry-m{min-width:0}
+.entry-title{font-size:18px;font-weight:500;color:var(--paper);display:flex;align-items:center;gap:8px}
+.entry-title .crown{color:var(--gold)}
+.entry-by{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:2px}
+.entry-r{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.score{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--paper)}
+.score.pending{font-size:12px;color:var(--mut)}
+.score small{font-size:11px;color:var(--mut)}
+.entry-reason{grid-column:2/-1;font-size:13px;color:var(--mut);font-style:italic;margin-top:2px;line-height:1.5}
+.contest-actions{display:flex;gap:10px;flex-wrap:wrap;padding:16px 28px 24px;border-top:1px solid var(--line);background:var(--ink2)}
+.c-empty{padding:50px;text-align:center;color:var(--mut);border:1px solid var(--line);border-radius:6px}
+
+/* FOOT */
+.foot{max-width:var(--maxw);margin:0 auto;padding:26px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--mut)}
+.foot-r{display:flex;gap:16px;align-items:center}.live{color:var(--gold)}
+
+/* FORM AS IN-SITE PAGE + manuscript input */
+.scrim{position:fixed;inset:0;background:transparent;opacity:0;pointer-events:none;transition:opacity .2s;z-index:80}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;inset:0;width:100%;height:100dvh;background:var(--ink);transform:translateY(18px);opacity:0;visibility:hidden;transition:opacity .25s,transform .25s,visibility .25s;z-index:81;overflow-y:auto}
+.drawer.on{transform:none;opacity:1;visibility:visible}
+.drawer-h{max-width:680px;margin:0 auto;padding:24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:var(--ink)}
+.drawer-h h3{font-size:22px;font-weight:600}
+.drawer-b{max-width:680px;margin:0 auto;padding:34px 24px 70px}
+.drawer-b>p{color:var(--mut);font-size:15px;margin-bottom:8px;font-style:italic}
+label{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin:20px 0 8px}
+input,textarea{width:100%;background:transparent;border:none;border-bottom:1px solid var(--line2);border-radius:0;padding:8px 2px;font-family:var(--serif);font-size:18px;color:var(--paper)}
+input:focus,textarea:focus{outline:none;border-bottom-color:var(--gold)}
+input::placeholder,textarea::placeholder{color:var(--faint)}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+/* manuscript composer */
+.ms-title{font-size:30px!important;font-weight:500;border-bottom:1px solid var(--line2)!important;margin-bottom:6px}
+.ms-body{font-size:18px!important;min-height:160px;font-style:italic}
+.hint{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px;letter-spacing:.03em}
+.kv{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.kv .k{color:var(--mut);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.kv .v{text-align:right;color:var(--paper)}
+
+#log{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:9px;z-index:90;max-width:330px}
+.toast{background:var(--card);border:1px solid var(--line2);border-left:3px solid var(--gold);padding:12px 15px;font-family:var(--mono);font-size:12px;color:var(--paper)}
+.toast.err{border-left-color:var(--rose)}.toast.ok{border-left-color:var(--gold)}
+.toast .tt{display:block;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
+.spinner{display:inline-block;width:11px;height:11px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-1px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* GLOBAL OVERFLOW GUARD */
+html,body{overflow-x:hidden;max-width:100%}

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Quill - where the best writing wins</title>
+<meta name="description" content="An AI-judged writing contest on GenLayer. Hosts fund a prize; writers submit; a validator set scores each entry against the rubric, and the highest score takes the pool." />
+<link rel="stylesheet" href="./styles.css?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;600&display=swap">
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="#top">✒ Quill<span>The Prize</span></a>
+    <div class="nav-end">
+      <span id="walletslot"><button class="btn ghost sm" id="connectBtn">Connect</button></span>
+      <button class="btn gold sm" id="navPostBtn">Open a contest</button>
+    </div>
+  </div>
+</nav>
+
+<header class="mast" id="top">
+  <p class="mast-kick">AI-JUDGED WRITING CONTEST · GENLAYER</p>
+  <h1>Where the <em>best writing</em><br>wins the purse.</h1>
+  <p class="mast-sub">A host posts a prompt and funds a prize. Writers submit. A validator set reads every entry against the rubric and scores it from 0 to 100 - and the highest score takes the whole pool. The judging, and its reasoning, are written into the chain.</p>
+  <div class="mast-stats">
+    <span><b id="stContests">0</b> contests</span><span class="d">·</span>
+    <span><b id="stPrize">0</b> GEN in prizes</span><span class="d">·</span>
+    <span><b id="stEntries">0</b> entries</span>
+    <button class="btn ghost sm" id="refreshBtn" style="margin-left:auto">↻ Sync</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="contestList" class="contests"><div class="c-empty">Reading the chain…</div></div>
+</main>
+
+<footer class="foot">
+  <span>Quill · an AI-judged writing contest on GenLayer studionet</span>
+  <span class="foot-r"><a id="contractLink" href="https://explorer-studio.genlayer.com/contracts/0x065566Ea5d90d3f485956a7dF2Cf6F1BD8Dd6a3A" target="_blank" rel="noopener">Contract 0x0655...6a3A -></a><a href="https://docs.genlayer.com/" target="_blank" rel="noopener">GenLayer</a><span class="live">● studionet</span></span>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-h"><h3 id="drawerTitle">Open a contest</h3><button class="icon-btn" id="closeDrawer">✕</button></div>
+  <div class="drawer-b" id="drawerBody"></div>
+</aside>
+<div id="log"></div>
+<script type="module" src="./app.js?v=1"></script>
+</body>
+</html>
