@@ -1,11 +1,21 @@
 import { makeReader, write, connectWallet, activeAccount, balanceOf, short, toGen, GEN, fmtErr }
-  from "../shared/genlayer-lite.js";
+  from "./shared/genlayer-lite.js";
+import { mountReviewDesk } from "./shared/review-desk.js";
 
 const CONTRACT = "0x065566Ea5d90d3f485956a7dF2Cf6F1BD8Dd6a3A";
 const { read } = makeReader(CONTRACT);
 const C_OPEN = 0, C_CLOSED = 1, E_PENDING = 0, E_JUDGED = 1;
 let account = null, contests = [], entries = [];
 const $ = (id) => document.getElementById(id);
+
+queueMicrotask(() => mountReviewDesk({
+  contract: CONTRACT, read, write, ensureWallet, fmtErr,
+  entity: "Contest ruling", idLabel: "Contest ID", countMethod: "get_claim_count", recordMethod: "get_claim_record",
+  openWindowMethod: "open_challenge_window", submitChallengeMethod: "submit_challenge", resolveChallengeMethod: "resolve_challenge_with_genlayer",
+  submitAppealMethod: "submit_appeal", resolveAppealMethod: "resolve_appeal_with_genlayer", archiveMethod: "archive_claim",
+  variant: "ribbon", kicker: "Rubric review", title: "Quill judging bench",
+  intro: "Inspect the recorded contest ruling, challenge a scoring error with the source entry, and settle the appeal before the result is archived.",
+}));
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const isZero = (a) => !a || /^0x0+$/.test(a);
 
@@ -30,12 +40,12 @@ const entriesFor = (cid) => entries.filter((e) => Number(e.contest_id) === cid);
 
 async function load() {
   try {
-    const cc = Number(await read("get_contest_count"));
-    const cs = [];
-    for (let i = 0; i < cc; i++) cs.push({ id: i, ...(await read("get_contest", [i])) });
-    const ec = Number(await read("get_entry_count"));
-    const es = [];
-    for (let i = 0; i < ec; i++) es.push({ id: i, ...(await read("get_entry", [i])) });
+    const [ccRaw, ecRaw] = await Promise.all([read("get_contest_count"), read("get_entry_count")]);
+    const cc = Number(ccRaw), ec = Number(ecRaw);
+    const [cs, es] = await Promise.all([
+      Promise.all(Array.from({ length: cc }, (_, i) => read("get_contest", [i]).then((record) => ({ id: i, ...record })))),
+      Promise.all(Array.from({ length: ec }, (_, i) => read("get_entry", [i]).then((record) => ({ id: i, ...record })))),
+    ]);
     contests = cs; entries = es; renderList();
     $("stContests").textContent = cc;
     $("stPrize").textContent = toGen(cs.reduce((a, c) => a + BigInt(c.prize), 0n).toString());
@@ -98,7 +108,7 @@ function openNew() {
     <p>Post a prompt, set the rubric writers are judged against, and fund the prize.</p>
     <label>Contest title</label><input id="nCTitle" maxlength="90" placeholder="The Consensus Essay Prize" autocomplete="off" />
     <label>Prompt</label><textarea id="nPrompt" placeholder="What should writers respond to?"></textarea>
-    <label>Judging rubric</label><textarea id="nRubric" placeholder="What makes a winning entry? Clarity, originality, argument…"></textarea>
+    <label>Judging rubric</label><textarea id="nRubric" placeholder="What makes a winning entry? Clarity, originality, argument..."></textarea>
     <label>Prize pool (GEN)</label><input id="nPrize" type="number" min="0" step="0.5" value="10" style="font-family:var(--mono)" />
     <button class="btn gold block" id="createBtn">Fund prize & open contest</button>`;
   $("createBtn").onclick = doCreate; openDrawer();
@@ -110,7 +120,7 @@ function openSubmit(cid) {
   $("drawerBody").innerHTML = `
     <p>Entering "${esc(c.title)}" \u2014 prize ${toGen(c.prize)} GEN.</p>
     <input id="nETitle" class="ms-title" maxlength="100" placeholder="Title of your piece" autocomplete="off" />
-    <label>Public URL of the work</label><input id="nEUrl" placeholder="https://… where the judges can read it" autocomplete="off" />
+    <label>Public URL of the work</label><input id="nEUrl" placeholder="https://... where the judges can read it" autocomplete="off" />
     <p class="hint">VALIDATORS WILL READ IT AGAINST THE RUBRIC AND SCORE IT 0\u2013100.</p>
     <button class="btn gold block" id="submitBtn2">Submit entry</button>`;
   $("submitBtn2").onclick = () => doSubmit(cid); openDrawer();

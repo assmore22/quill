@@ -1,84 +1,115 @@
-"""Tests for QUILL (direct runner). AI judge_entry() validated live on studionet."""
+"""Executable Quill V2 authorization and settlement-invariant tests."""
+
+import json
 from pathlib import Path
 
-CONTRACT = str(Path(__file__).resolve().parents[1] / "contracts" / "quill.py")
-GEN = 10 ** 18
-C_OPEN = 0; C_CLOSED = 1; E_PENDING = 0
+
+CONTRACT = str(Path(__file__).resolve().parents[1] / "contracts" / "quill_v2.py")
 
 
-def _open(q, vm, who, title="Essay Prize", prompt="Why consensus matters", rubric="Clarity and insight", prize=10):
-    vm.sender = who; vm.value = prize * GEN
-    cid = q.open_contest(title, prompt, rubric); vm.value = 0
-    return cid
+def _deploy_and_draft(deploy, vm, owner, counterparty):
+    vm.warp("2026-07-16T12:00:00Z")
+    vm.sender = owner
+    contract = deploy(CONTRACT)
+    peer = "0x" + counterparty.hex()
+    record_id = contract.draft_claim(peer, "Publication award", "The accepted work is publicly listed", "https://example.com", "publishing", "0")
+    return contract, record_id
 
 
-def test_open_contest(deploy, direct_vm, direct_alice):
-    q = deploy(CONTRACT)
-    cid = _open(q, direct_vm, direct_alice)
-    assert cid == 0
-    c = q.get_contest(0)
-    assert c["status"] == C_OPEN
-    assert int(c["prize"]) == 10 * GEN
-    assert c["has_winner"] == 0
+def _mock_review(vm):
+    vm.mock_llm(
+        r"Reply ONLY JSON with keys: outcome",
+        json.dumps({
+            "outcome": "met",
+            "confidenceBps": 8400,
+            "triggerBps": 8500,
+            "acceptanceBps": 8500,
+            "grantBps": 8500,
+            "settlementBps": 8500,
+            "deliveryBps": 8500,
+            "summary": "The submitted public evidence satisfies the standard.",
+            "rationale": "The source and stated condition agree.",
+            "riskFlags": [],
+        }),
+    )
 
 
-def test_open_requires_prize(deploy, direct_vm, direct_alice):
-    q = deploy(CONTRACT)
-    direct_vm.sender = direct_alice; direct_vm.value = 0
-    with direct_vm.expect_revert("fund a prize pool"):
-        q.open_contest("t", "p", "r")
+def _mock_ruling(vm, kind, ruling, revised):
+    vm.mock_llm(
+        rf"resolving .* {kind}",
+        json.dumps({
+            "ruling": ruling,
+            "revisedOutcome": revised,
+            "confidenceDeltaBps": -900 if revised == "not_met" else 700,
+            "reason": "The filing supplies controlling public evidence.",
+            "riskFlags": [],
+        }),
+    )
 
 
-def test_open_requires_prompt(deploy, direct_vm, direct_alice):
-    q = deploy(CONTRACT)
-    direct_vm.sender = direct_alice; direct_vm.value = GEN
-    with direct_vm.expect_revert("a prompt is required"):
-        q.open_contest("t", "", "r")
-    direct_vm.value = 0
-
-
-def test_submit_entry(deploy, direct_vm, direct_alice, direct_bob):
-    q = deploy(CONTRACT)
-    _open(q, direct_vm, direct_alice)
+def test_admin_standard_and_review_permissions_execute(
+    deploy, direct_vm, direct_alice, direct_bob, direct_charlie
+):
+    contract, record_id = _deploy_and_draft(
+        deploy, direct_vm, direct_alice, direct_bob
+    )
     direct_vm.sender = direct_bob
-    eid = q.submit_entry(0, "My Entry", "https://example.com/essay")
-    assert eid == 0
-    e = q.get_entry(0)
-    assert e["status"] == E_PENDING
-    assert e["contest_id"] == 0
-    assert e["title"] == "My Entry"
+    with direct_vm.expect_revert("admin_only"):
+        contract.set_claim_standard("attacker-controlled settlement standard")
+
+    direct_vm.sender = direct_charlie
+    with direct_vm.expect_revert("record_operator_only"):
+        contract.review_claim_with_genlayer(str(record_id))
 
 
-def test_submit_requires_url(deploy, direct_vm, direct_alice, direct_bob):
-    q = deploy(CONTRACT)
-    _open(q, direct_vm, direct_alice)
-    direct_vm.sender = direct_bob
-    with direct_vm.expect_revert("a public URL is required"):
-        q.submit_entry(0, "t", "")
-
-
-def test_award_requires_judged(deploy, direct_vm, direct_alice):
-    q = deploy(CONTRACT)
-    _open(q, direct_vm, direct_alice)
+def test_maturity_challenge_appeal_and_final_settlement_execute(
+    deploy, direct_vm, direct_alice, direct_bob, direct_charlie
+):
+    contract, record_id = _deploy_and_draft(
+        deploy, direct_vm, direct_alice, direct_bob
+    )
     direct_vm.sender = direct_alice
-    with direct_vm.expect_revert("no judged entry"):
-        q.award(0)
+    _mock_review(direct_vm)
+    contract.review_claim_with_genlayer(str(record_id))
 
+    with direct_vm.expect_revert("review_not_mature"):
+        contract.settle(record_id)
 
-def test_judge_bad_id(deploy, direct_vm, direct_alice):
-    q = deploy(CONTRACT)
+    contract.open_challenge_window(str(record_id))
+    direct_vm.sender = direct_charlie
+    challenge_id = contract.submit_challenge(
+        str(record_id),
+        "The initial source was superseded.",
+        "https://example.org/challenge",
+    )
+
     direct_vm.sender = direct_alice
-    with direct_vm.expect_revert("no such entry"):
-        q.judge_entry(0)
+    with direct_vm.expect_revert("open_review_filing"):
+        contract.settle(record_id)
 
+    _mock_ruling(direct_vm, "challenge", "accepted", "not_met")
+    contract.resolve_challenge_with_genlayer(str(record_id), challenge_id)
+    record = json.loads(contract.get_claim_record(str(record_id)))
+    assert record["outcome"] == "not_met"
 
-def test_multiple(deploy, direct_vm, direct_alice, direct_bob):
-    q = deploy(CONTRACT)
-    _open(q, direct_vm, direct_alice, title="Prize A")
-    _open(q, direct_vm, direct_alice, title="Prize B")
-    direct_vm.sender = direct_bob
-    q.submit_entry(0, "E1", "https://a.com")
-    q.submit_entry(1, "E2", "https://b.com")
-    assert q.get_contest_count() == 2
-    assert q.get_entry_count() == 2
-    assert q.get_entry(1)["contest_id"] == 1
+    direct_vm.sender = direct_charlie
+    appeal_id = contract.submit_appeal(
+        str(record_id),
+        "A final official publication controls the decision.",
+        "https://example.net/appeal",
+    )
+
+    direct_vm.sender = direct_alice
+    with direct_vm.expect_revert("open_review_filing"):
+        contract.settle(record_id)
+
+    _mock_ruling(direct_vm, "appeal", "granted", "met")
+    contract.resolve_appeal_with_genlayer(str(record_id), appeal_id)
+    direct_vm.warp("2026-07-16T13:00:01Z")
+    contract.settle(record_id)
+
+    record = json.loads(contract.get_claim_record(str(record_id)))
+    assert record["outcome"] == "met"
+    assert record["status"] == "RESOLVED"
+    assert record["challengeIds"] == [challenge_id]
+    assert record["appealIds"] == [appeal_id]

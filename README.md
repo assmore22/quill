@@ -10,7 +10,7 @@ Quill turns creative submissions into auditable contest entries. Entries, judgin
 | --- | --- |
 | Live app | https://assmore22-quill.vercel.app |
 | GitHub | https://github.com/assmore22/quill |
-| Contract | https://explorer-studio.genlayer.com/contracts/0x065566Ea5d90d3f485956a7dF2Cf6F1BD8Dd6a3A |
+| Contract | https://explorer-studio.genlayer.com/address/0x065566Ea5d90d3f485956a7dF2Cf6F1BD8Dd6a3A |
 
 ## Chain Record
 
