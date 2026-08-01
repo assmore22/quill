@@ -8,7 +8,7 @@ Quill turns creative submissions into auditable contest entries. Entries, judgin
 
 | Surface | Link |
 | --- | --- |
-| Live app | https://tanawo3-quill.vercel.app |
+| Live app | https://quill-creative-judging.vercel.app |
 | GitHub | https://github.com/assmore22/quill |
 | Contract | https://explorer-studio.genlayer.com/address/0x065566Ea5d90d3f485956a7dF2Cf6F1BD8Dd6a3A |
 
